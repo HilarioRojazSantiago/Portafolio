@@ -1,0 +1,156 @@
+PRINT_CHAR MACRO ARG0
+    PUSH AX
+    PUSH DX
+    MOV DL, ARG0
+    MOV AH, 02h
+    INT 21h
+    POP DX
+    POP AX
+ENDM
+
+LINE_JUMP MACRO    
+    PRINT_CHAR 0Ah      
+    PRINT_CHAR 0Dh
+ENDM
+
+PRINT_STRING MACRO ARG0
+    PUSH AX
+    PUSH DX
+    MOV DX, OFFSET ARG0
+    MOV AH, 09h
+    INT 21h
+    POP DX
+    POP AX
+ENDM
+
+READ_CHAR MACRO ARG0
+    PUSH BP
+    PUSH AX
+    MOV BP, SP
+    MOV AH, 01h
+    INT 21h
+    MOV [BP+2], AX
+    POP AX
+    MOV ARG0, BYTE PTR[BP+2]
+    POP BP
+ENDM
+
+READ_STRING MACRO ARG0
+    LOCAL TAG0, TAG1
+    PUSH SI
+    PUSH AX
+    MOV SI, 0h
+    TAG0:
+    READ_CHAR AH
+    CMP AH, 0Dh
+    JE TAG1
+    MOV ARG0[SI], AH
+    ADD SI, 1h
+    JMP TAG0
+    TAG1:
+    MOV ARG0[SI], 24h
+    POP AX
+    POP SI
+ENDM
+
+ASCII_BINARY MACRO ARG0
+    LOCAL TAG0, TAG1, TAG2
+    PUSH BP
+    PUSH AX
+    MOV BP, SP
+    MOV AL, ARG0
+    CMP AL, 30h
+    JL TAG1
+    CMP AL, 39h
+    JG TAG0
+    SUB AL, 30h
+    JMP TAG2
+    TAG0:
+    CMP AL, 41h
+    JL TAG1
+    CMP AL, 46h
+    JG TAG1
+    SUB AL, 37h
+    JMP TAG2
+    TAG1: 
+    MOV AL, 00h
+    TAG2:
+    MOV [BP+2], AX
+    POP AX
+    MOV ARG0, BYTE PTR[BP+2]
+    POP BP
+ENDM
+
+BINARY_ASCII MACRO ARG0
+    LOCAL TAG0, TAG1
+    PUSH BP
+    PUSH AX
+    MOV BP, SP
+    MOV AL, ARG0
+    CMP AL, 09h
+    JG TAG0
+    ADD AL, 30h
+    JMP TAG1
+    TAG0:
+    ADD AL, 37h
+    TAG1:
+    MOV [BP+2], AX
+    POP AX
+    MOV ARG0, BYTE PTR[BP+2]
+    POP BP
+ENDM
+
+READ_DB MACRO ARG0
+    PUSH BP
+    PUSH AX
+    PUSH CX
+    MOV BP, SP
+    READ_CHAR AH
+    ASCII_BINARY AH
+    MOV CL, 04h
+    SHL AH, CL
+    READ_CHAR AL
+    ASCII_BINARY AL
+    ADD AL, AH
+    MOV [BP+2], AX
+    POP CX
+    POP AX
+    MOV ARG0, BYTE PTR[BP+2]
+    POP BP
+ENDM
+
+PRINT_DB MACRO ARG0
+    PUSH CX
+    PUSH DX
+    MOV DH, ARG0
+    MOV DL, ARG0
+    MOV CL, 04h
+    SHR DH, CL
+    BINARY_ASCII DH
+    PRINT_CHAR DH
+    AND DL, 0Fh
+    BINARY_ASCII DL
+    PRINT_CHAR DL
+    POP DX
+    POP CX
+ENDM
+
+READ_DW MACRO ARG0
+    PUSH BP
+    PUSH AX
+    MOV BP, SP
+    READ_DB AH
+    READ_DB AL
+    MOV [BP+2], AX
+    POP AX
+    MOV ARG0, [BP+2]
+    POP BP
+ENDM
+
+PRINT_DW MACRO ARG0
+    PUSH AX
+    MOV AX, ARG0
+    PRINT_DB AH
+    PRINT_DB AL
+    POP AX
+ENDM
