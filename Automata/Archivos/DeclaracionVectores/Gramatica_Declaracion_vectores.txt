@@ -1,0 +1,7 @@
+S -> T V ;
+V -> identificador V'
+V' -> [ constante ] V'
+V' -> null
+T -> int
+T -> char
+T -> float

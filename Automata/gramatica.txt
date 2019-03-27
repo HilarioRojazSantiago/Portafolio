@@ -1,0 +1,378 @@
+PROGRAMA -> # include < stdio.h > int main ( ) { LISTA_SENTENCIAS return constante ; }
+{
+    .trad = "uses Crt;" || "\n" || "var" || "\n" || LISTA_SENTENCIAS.var || "\n" ||"begin" || "\n" || LISTA_SENTENCIAS.begin || "\n" ||"End."
+}
+LISTA_SENTENCIAS -> SENTENCIA LISTA_SENTENCIAS
+{
+    .var = LISTA_SENTENCIAS.var != "" ? SENTENCIA.var || "\n" || LISTA_SENTENCIAS.var # SENTENCIA.var
+    .begin = LISTA_SENTENCIAS.begin != "" ? SENTENCIA.begin || "\n" || LISTA_SENTENCIAS.begin # SENTENCIA.begin
+}
+LISTA_SENTENCIAS -> null
+{
+    .var = ""
+    .begin = ""
+}
+SENTENCIA -> DECLARACION_VARIABLE ;
+{
+    .var = DECLARACION_VARIABLE.trad || ";"
+    .begin = DECLARACION_VARIABLE.inicializar
+}
+SENTENCIA -> DECLARACION_VECTOR ;
+{
+    .var = DECLARACION_VECTOR.trad || ";"
+    .begin = ""
+}
+SENTENCIA -> ASIGNACION ;
+{
+    .var = ""
+    .begin = ASIGNACION.trad || ";"
+}
+SENTENCIA -> WHILE
+{
+    .var = WHILE.var
+    .begin = WHILE.trad
+}
+SENTENCIA -> while ( CONDICION ) SENTENCIA
+{
+    .var = SENTENCIA.var
+    .begin = "while (" || CONDICION.trad || ") do begin" || "\n" || SENTENCIA.begin  || "\n" || "end;"
+}
+SENTENCIA -> FOR
+{
+    .var = FOR.var
+    .begin = FOR.trad
+}
+SENTENCIA -> for ( F1 ; F2 ; F3 ) SENTENCIA 
+{
+    .begin = F1.trad || ";" ||"\n" || "while ("
+    .begin = F2.trad != "" ? .begin || F2.trad # .begin || "1"
+    .begin = .begin || ") do begin" || "\n" || SENTENCIA.begin
+    .begin = F3.trad != "" ? .begin || "\n" || F3.trad # .begin
+    .begin = .begin || "\n" || "end;"
+    .var = F1.var != "" ? F1.var || ";" # ""
+    .var = SENTENCIA.var != "" ? .var || "\n" || SENTENCIA.var # .var
+}
+SENTENCIA -> SWITCH
+{
+    .var = SWITCH.var
+    .begin = SWITCH.trad
+}
+SENTENCIA -> IF_ELSE
+{
+    .var = IF_ELSE.var
+    .begin = IF_ELSE.trad
+}
+SENTENCIA -> if ( CONDICION ) SENTENCIA
+{
+    .var = SENTENCIA.var
+    .begin = "if (" || CONDICION.trad || ") then begin" || "\n" || SENTENCIA.begin  || "\n" || "end."
+}    
+DECLARACION_VARIABLE -> TIPO VARIABLE L
+{
+    .trad = VARIABLE.trad || L.trad || " : " || TIPO.trad
+    .inicializar = VARIABLE.inicializar != "" ? VARIABLE.trad || " := " || VARIABLE.inicializar # ""
+    .inicializar = L.inicializar != "" ? .inicializar || "\n" || L.inicializar # .inicializar
+}
+L -> , VARIABLE L
+{
+    .trad = ", " || VARIABLE.trad || L.trad
+    .inicializar =  VARIABLE.trad || " := " || VARIABLE.inicializar
+    .inicializar = L.inicializar != "" ? .inicializar || "\n" || L.inicializar # .inicializar
+}
+L -> null
+{
+    .trad = ""
+    .inicializar = ""
+}
+VARIABLE -> identificador = EXPRESION
+{
+    .trad = identificador.valex
+    .inicializar = EXPRESION.trad || ";"
+}
+VARIABLE -> identificador
+{
+    .trad = identificador.valex
+    .inicializar = ""
+}
+DECLARACION_VECTOR -> TIPO VECTOR U
+{
+    .trad = VECTOR.trad || " : " || VECTOR.dimension || TIPO.trad
+    .trad = VECTOR.inicializar != "" ? .trad || " = " || VECTOR.inicializar # .trad
+    .trad = U.trad != "" ? "(* No se puede traducir mas de un arreglo declarado en la misma linea *)" || "\n" || .trad # .trad
+}
+U -> , VECTOR U
+{
+    .trad = "U"
+}
+U -> null
+{
+    .trad = ""
+}
+VECTOR -> identificador [ constante ] DIMENSION = ARREGLO
+{
+    .trad = identificador.valex
+    .dimension = "array [0.." || constante.valex
+    .dimension = DIMENSION.trad != "" ? .dimension || ", " ||DIMENSION.trad # .dimension
+    .dimension = .dimension || "] of "
+    .inicializar = ARREGLO.trad
+}
+VECTOR -> identificador [ constante ] DIMENSION
+{
+    .trad = identificador.valex
+    .dimension = "array [0.." || constante.valex
+    .dimension = DIMENSION.trad != "" ? .dimension || ", " || DIMENSION.trad # .dimension
+    .dimension = .dimension || "] of "
+    .inicializar = ""
+}
+DIMENSION -> [ constante ] DIMENSION
+{
+    .trad = DIMENSION.trad == "" ? "0.." || constante.valex # "0.." || constante.valex || ", " || DIMENSION.trad 
+}
+DIMENSION -> null
+{
+    .trad = ""
+}
+ARREGLO -> { ELEMENTO M }
+{
+    .trad = "(" || ELEMENTO.trad || M.trad || ")"
+}
+M -> , ELEMENTO M
+{
+    .trad = ", " || ELEMENTO.trad || M.trad
+}
+M -> null
+{
+    .trad = ""
+}
+ELEMENTO -> constante
+{
+    .trad = constante.valex
+}
+ELEMENTO -> { ELEMENTO M }
+{
+    .trad = "(" || ELEMENTO.trad || M.trad || ")"
+}
+TIPO -> int
+{
+    .trad = "integer"
+}
+TIPO -> float
+{
+    .trad = "real"
+}
+TIPO -> char
+{
+    .trad = "char"
+}
+TIPO -> double
+{
+    .trad = "double"
+}
+EXPRESION -> EXPRESION + PRODUCTO
+{
+    .trad = EXPRESION.trad || "+" || PRODUCTO.trad
+}
+EXPRESION -> EXPRESION - PRODUCTO
+{
+    .trad = EXPRESION.trad || "-" || PRODUCTO.trad
+}
+EXPRESION -> PRODUCTO
+{
+    .trad = PRODUCTO.trad
+}
+PRODUCTO -> PRODUCTO * F
+{
+    .trad = PRODUCTO.trad || "*" || F.trad
+}
+PRODUCTO -> PRODUCTO / F
+{
+    .trad = PRODUCTO.trad || "/" || F.trad
+}
+PRODUCTO -> F
+{
+    .trad = F.trad
+}
+F -> ( EXPRESION )
+{
+    .trad = "(" || EXPRESION.trad || ")"
+}
+F -> identificador
+{
+    .trad = identificador.valex
+}
+F -> constante
+{
+    .trad = constante.valex
+}
+ASIGNACION -> identificador = EXPRESION
+{
+    .trad = identificador.valex || " := " || EXPRESION.trad
+}
+ASIGNACION -> identificador + +
+{
+    .trad = identificador.valex || " := " || identificador.valex || "+1"
+}
+ASIGNACION -> identificador - -
+{
+    .trad = identificador.valex || " := " || identificador.valex || "-1"
+}
+ASIGNACION -> + + identificador
+{
+    .trad = identificador.valex || " := " || identificador.valex || "+1"
+}
+ASIGNACION -> - - identificador
+{
+    .trad = identificador.valex || " := " || identificador.valex || "-1"
+}
+WHILE -> while ( CONDICION ) { LISTA_SENTENCIAS }
+{
+    .trad = "while (" || CONDICION.trad || ") do begin"
+    .trad = LISTA_SENTENCIAS.begin != "" ? .trad || "\n" || LISTA_SENTENCIAS.begin # .trad
+    .trad = .trad || "\n" || "end;"
+    .var = LISTA_SENTENCIAS.var
+}
+CONDICION -> EXPRESION_IZQUIERDA = = EXPRESION_DERECHA
+{
+    .trad = EXPRESION_IZQUIERDA.trad || " == " || EXPRESION_DERECHA.trad
+}
+CONDICION -> EXPRESION_IZQUIERDA > EXPRESION_DERECHA
+{
+    .trad = EXPRESION_IZQUIERDA.trad || " > " || EXPRESION_DERECHA.trad
+}
+CONDICION -> EXPRESION_IZQUIERDA < EXPRESION_DERECHA
+{
+    .trad = EXPRESION_IZQUIERDA.trad || " < " || EXPRESION_DERECHA.trad
+}
+CONDICION -> EXPRESION_IZQUIERDA > = EXPRESION_DERECHA
+{
+    .trad = EXPRESION_IZQUIERDA.trad || " >= " || EXPRESION_DERECHA.trad
+}
+CONDICION -> EXPRESION_IZQUIERDA < = EXPRESION_DERECHA
+{
+    .trad = EXPRESION_IZQUIERDA.trad || " <= " || EXPRESION_DERECHA.trad
+}
+CONDICION -> EXPRESION_IZQUIERDA ! = EXPRESION_DERECHA
+{
+    .trad = EXPRESION_IZQUIERDA.trad || " != " || EXPRESION_DERECHA.trad
+}
+CONDICION -> EXPRESION
+{
+    .trad = EXPRESION.trad
+}
+EXPRESION_IZQUIERDA -> EXPRESION
+{
+    .trad = EXPRESION.trad
+}  
+EXPRESION_DERECHA -> EXPRESION
+{
+    .trad = EXPRESION.trad
+}      
+FOR -> for ( F1 ; F2 ; F3 ) { LISTA_SENTENCIAS }
+{
+    .trad = F1.trad || "\n" || "while ("
+    .trad = F2.trad != "" ? .trad || F2.trad # .trad || "1"
+    .trad = .trad || ") do begin"
+    .trad = LISTA_SENTENCIAS.begin != "" ? .trad || "\n" || LISTA_SENTENCIAS.begin # .trad
+    .trad = F3.trad != "" ? .trad || "\n" || F3.trad # .trad
+    .trad = .trad || "\n" || "end;"
+    .var = F1.var != "" ? F1.var || ";" # ""
+    .var = LISTA_SENTENCIAS.var != "" ? .var || "\n" || LISTA_SENTENCIAS.var # .var
+}
+F1 -> DECLARACION_VARIABLE
+{
+    .trad = DECLARACION_VARIABLE.inicializar
+    .var = DECLARACION_VARIABLE.trad
+}
+F1 -> ASIGNACION
+{
+    .trad = ASIGNACION.trad
+    .var = ""
+}
+F1 -> null
+{
+    .trad = ""
+    .var = ""
+}
+F2 -> CONDICION
+{
+    .trad = CONDICION.trad
+}
+F2 -> null
+{
+    .trad = ""
+}
+F3 -> ASIGNACION
+{
+    .trad = ASIGNACION.trad
+}
+F3 -> null 
+{
+    .trad = ""
+}
+SWITCH -> switch ( identificador ) { LISTA_CASE DEFAULT }
+{
+    .trad = "case " || identificador.valex || " of "
+    .trad = LISTA_CASE.trad != "" ? .trad || "\n" || LISTA_CASE.trad # .trad
+    .trad = DEFAULT.trad != "" ? .trad || "\n" || DEFAULT.trad # .trad
+    .trad = .trad || "\n" || "end;"
+    .var = LISTA_CASE.var
+    .var = DEFAULT.var != "" ? .var || "\n" || DEFAULT.var # .var
+}
+LISTA_CASE -> CASE LISTA_CASE
+{
+    .trad = LISTA_CASE.trad != "" ? CASE.trad || "\n" || LISTA_CASE.trad # CASE.trad
+    .var = LISTA_CASE.var != "" ? CASE.var || "\n" || LISTA_CASE.var # CASE.var
+}
+LISTA_CASE -> null
+{
+    .trad = ""
+    .var = ""
+}
+CASE -> case constante : LISTA_SENTENCIAS break ;
+{
+    .trad = constante.valex || " : (" || "\n" || LISTA_SENTENCIAS.begin || "\n" || ");"
+    .var = LISTA_SENTENCIAS.var
+}
+DEFAULT -> default : LISTA_SENTENCIAS break ;
+{
+    .trad = "else (" || "\n" || LISTA_SENTENCIAS.begin || "\n" || ");"
+    .var = LISTA_SENTENCIAS.var
+}
+DEFAULT -> null
+{
+    .trad = ""
+    .var = ""
+}
+IF_ELSE -> IF ELSE_IF
+{
+    .trad = ELSE_IF.trad != "" ? IF.trad || "\n" || ELSE_IF.trad # IF.trad
+    .var = ELSE_IF.var != "" ? IF.var || "\n" || ELSE_IF.var # IF.var
+}
+IF -> if ( CONDICION ) { LISTA_SENTENCIAS }
+{
+    .trad = "if (" || CONDICION.trad || ") then begin"
+    .trad = LISTA_SENTENCIAS.begin != "" ? .trad || "\n" || LISTA_SENTENCIAS.begin # .trad
+    .trad = .trad || "\n" || "end;"
+    .var = LISTA_SENTENCIAS.var
+}
+ELSE_IF -> else if ( CONDICION ) { LISTA_SENTENCIAS } ELSE_IF
+{
+    .trad = "else if (" || CONDICION.trad || ") then begin"
+    .trad = LISTA_SENTENCIAS.begin != "" ? .trad || "\n" || LISTA_SENTENCIAS.begin # .trad
+    .trad = .trad || "\n" || "end;"
+    .trad = ELSE_IF.trad != "" ? .trad || "\n" || ELSE_IF.trad # .trad
+    .var = LISTA_SENTENCIAS.var
+    .var = ELSE_IF.var != "" ? .var || "\n" || ELSE_IF.var # .var
+}
+ELSE_IF -> else { LISTA_SENTENCIAS }
+{
+    .trad = "else begin"
+    .trad = LISTA_SENTENCIAS.begin != "" ? .trad || "\n" || LISTA_SENTENCIAS.begin # .trad
+    .trad = .trad || "\n" || "end;"
+    .var = LISTA_SENTENCIAS.var
+}
+ELSE_IF -> null
+{
+    .trad = ""  
+    .var = ""
+}

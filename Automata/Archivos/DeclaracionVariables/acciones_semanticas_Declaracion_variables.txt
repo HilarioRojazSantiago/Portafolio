@@ -1,0 +1,5 @@
+{ .trad = "var" # identificador_valex # L_trad # ":" # T_trad # ";" }
+{ .trad = "," # identificador_valex # L_trad } 
+{ .trad = "" }
+{ .trad = "real" }
+{ .trad = "integer" }

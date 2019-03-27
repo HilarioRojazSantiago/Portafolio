@@ -1,0 +1,6 @@
+{ .v = E.v + T.v }
+{ .v = T.v }
+{ .v = T.v * F.v }
+{ .v = F.v }
+{ .v = E.v }
+{ .v = constante.valex }

@@ -1,0 +1,7 @@
+{ .trad = "var" # V_trad # T_trad # ";" }
+{ .trad = identificador_valex # ":" # V'_trad } % { .trad = identificador_valex # ":" # "array[" # V'_trad }
+{ .trad = "0.." # constante_valex # "]of" } % { .trad = "0.." # constante_valex # "," # V'_trad }
+{ .trad = "" }
+{ .trad = "integer" }
+{ .trad = "char" }
+{ .trad = "real" }
