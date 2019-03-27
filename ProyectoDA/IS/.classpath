@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-8-openjdk-amd64"/>
+	<classpathentry excluding="src/AprendeFP/|src/com/empresa/aprendefp/vista/" kind="src" path="src"/>
+	<classpathentry kind="lib" path="/home/nes/Descargas/DB/mysql-connector-java_8.0.13-1ubuntu16.04_all/usr/share/java/mysql-connector-java-8.0.13.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
